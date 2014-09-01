@@ -1,0 +1,5 @@
+Parsing test06-repeat-x-y.simp
+Parsing complete
+{ (x,[z]), (y,[z]), (z,[z]) }
+Analysis complete
+No errors detected.

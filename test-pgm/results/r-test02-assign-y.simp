@@ -1,0 +1,5 @@
+Parsing test02-assign-y.simp
+Parsing complete
+{ (x,[x]), (y,[x]) }
+Analysis complete
+No errors detected.

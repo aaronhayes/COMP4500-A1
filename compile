@@ -1,0 +1,3 @@
+CLASSPATH=bin:$CLASSPATH
+
+javac -g -d bin -sourcepath src src/parseDependencies/Main.java

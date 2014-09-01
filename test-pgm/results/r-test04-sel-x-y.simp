@@ -1,0 +1,5 @@
+Parsing test04-sel-x-y.simp
+Parsing complete
+{ (t,[x, y]), (x,[x]), (y,[y]) }
+Analysis complete
+No errors detected.

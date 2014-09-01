@@ -1,0 +1,11 @@
+CLASSPATH=../bin
+MAIN=parseDependencies.Main
+export CLASSPATH
+
+if [ $# -lt 1 ]; then
+    echo "Usage: mkresult test_file"
+elif [ -f "$1" ]; then
+    java ${MAIN} $1 2>&1 | tee results/r-$1
+else
+    echo "<$1>" does not exist
+fi

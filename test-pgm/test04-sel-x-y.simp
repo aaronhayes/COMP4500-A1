@@ -1,0 +1,7 @@
+// select with t depending on both x and y
+// { (t,[x, y]), (x,[x]), (y,[y]) }
+inputs x,y; 
+select { 
+	t = x;
+  | t = y; 
+}

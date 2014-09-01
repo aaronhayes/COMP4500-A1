@@ -1,0 +1,7 @@
+// Indirect dependency on input
+// { (x,[y]), (y,[y]), (z,[y]) }
+inputs y;
+{
+	x = y;
+	z = x;
+}

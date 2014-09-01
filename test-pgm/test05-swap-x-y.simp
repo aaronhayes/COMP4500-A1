@@ -1,0 +1,8 @@
+// swap x and y - each depends on the other
+// { (t,[x]), (x,[y]), (y,[x]) }
+inputs x,y;
+{ 
+	t = x; 
+	x = y; 
+	y = t; 
+}

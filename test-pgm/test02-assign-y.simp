@@ -1,0 +1,4 @@
+// assign input to y
+// { (x,[x]), (y,[x]) }
+inputs x; 
+y = x;

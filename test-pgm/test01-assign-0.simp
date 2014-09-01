@@ -1,0 +1,4 @@
+// assign to input - removes dependency
+// { (x,[]) }
+inputs x;
+x = 0;

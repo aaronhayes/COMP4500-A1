@@ -1,0 +1,5 @@
+Parsing test05-swap-x-y.simp
+Parsing complete
+{ (t,[x]), (x,[y]), (y,[x]) }
+Analysis complete
+No errors detected.
