@@ -37,7 +37,7 @@ public abstract class Statement {
         }
         public void buildGraph( ControlFlowNode entry, ControlFlowNode exit, 
                 FlowGraph flowGraph ) {
-            //TODO flowGraph.buildCompound( entry, exit, this );
+            flowGraph.buildCompound( entry, exit, this );
         }
         public String toString() {
             String result = "{";
@@ -61,7 +61,7 @@ public abstract class Statement {
 
         public void buildGraph( ControlFlowNode entry, ControlFlowNode exit, 
                 FlowGraph flowGraph ) {
-            //TODO flowGraph.buildSelect( entry, exit, this );
+            flowGraph.buildSelect( entry, exit, this );
         }
         public String toString() {
             String result = "select {";
@@ -87,7 +87,7 @@ public abstract class Statement {
 
         public void buildGraph( ControlFlowNode entry, ControlFlowNode exit, 
                 FlowGraph flowGraph ) {
-            //TODO flowGraph.buildRepeat( entry, exit, this );
+            flowGraph.buildRepeat( entry, exit, this );
         }
         public String toString() {
             return "repeat " + statement.toString();

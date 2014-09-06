@@ -23,8 +23,10 @@ public class DependSet {
         variables.add( var );
     }
     /** @return true if and only if the sets of variables are equal */
-    public boolean equals( DependSet other ) {
-        return variables.equals( other );
+    @Override
+    public boolean equals( Object other ) {
+        return other instanceof DependSet && 
+            variables.equals( ((DependSet)other).variables );
     }
     /** @return true if and only if the set of variables is empty */
     public boolean isEmpty() {
