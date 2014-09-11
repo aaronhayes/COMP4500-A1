@@ -1,9 +1,8 @@
 package dependencies;
 
 //import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Map.Entry;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.SortedMap;
 
@@ -32,31 +31,6 @@ public class Dependencies {
         return dependencies.get(var);
     }
     
-    public void replace(String var, DependSet vars) {
-        dependencies.remove(var);
-        dependencies.put(var, vars);
-    }
-    
-    /**
-     * 
-     */
-    public void clean() {
-        for (SortedMap.Entry<String, DependSet> entry : 
-            dependencies.entrySet()) {
-                entry.getValue().getDependencies().remove("911");
-        }
-    }
-    
-
-    /**
-     * 
-     * @param variable
-     */
-    public void remove(String variable) {
-        dependencies.remove(variable);
-    }
-    
-
     /**
      * Dependency equality requires that the dependencies are identical for all
      * variables
@@ -93,19 +67,42 @@ public class Dependencies {
     /**
      * 
      * @param variable
-     * @return
+     * @param expression
      */
-    public ArrayList<String> getKeys(String variable) {
-        ArrayList<String> keys = new ArrayList<String>();
+    public Dependencies add(String variable, DependSet expression) {
+        SortedSet<String> vars = expression.getDependencies();
+        DependSet newSet = new DependSet();
         
-        for (Entry<String, DependSet> entry : dependencies.entrySet()) {
-            if (entry.getValue().getDependencies().contains(variable)) {
-                keys.add(entry.getKey());
-            }
-                
+        for (String var : vars) {
+            DependSet set = dependencies.get(var);
+            //System.out.println(set);
+            if (set != null) {
+                newSet.merge(set);
+            } 
         }
         
-        return keys;
+        dependencies.put(variable, newSet);
+        return this;
+    }
+
+    /**
+     * 
+     * @param deps
+     * @return
+     */
+    public Dependencies merge(Dependencies deps) {
+        for (String key : dependencies.keySet()) {
+            if (deps.dependencies.containsKey(key)) {
+                dependencies.get(key).merge(deps.get(key));
+            }
+        }
         
+        for (String key : deps.dependencies.keySet()) {
+            if (!dependencies.containsKey(key)) {
+                dependencies.put(key, deps.get(key));
+            }
+        }
+        
+        return this;
     }
 }

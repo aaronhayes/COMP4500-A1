@@ -53,35 +53,54 @@ public class FlowGraph {
     /** Calculate the dependencies for this graph */
     public Dependencies calculateDependencies(Dependencies entryDependencies) {
         Dependencies exitDependencies = entryDependencies.copy();
-        // TODO complete calculation of dependencies and
-        // TODO return the dependencies at the exit vertex
-
-        exitDependencies = depthFirstSearch(graph, entry, exitDependencies);
-        exitDependencies.clean();
-        return exitDependencies;
+        entry.setDepends(exitDependencies);
+        depthFirstSearch();
+        return exit.getDepends();
     }
-
-    private Dependencies depthFirstSearch(DGraph<ControlFlowNode, Primitive> g,
-            ControlFlowNode v, Dependencies deps) {
-        
-        for (ControlFlowNode n : graph) {
-            int links = 0;
-            for (AdjacentEdge<ControlFlowNode, Primitive> e : 
-                graph.adjacent(n)) {
-                links++;
-                if (links > 1) {
-                    deps = e.edgeInfo.calculateDependencies(deps, true);
-                } else {
-                    deps = e.edgeInfo.calculateDependencies(deps, false);
-                }
-                
-
+    
+    private void depthFirstSearch() {
+        for (ControlFlowNode v : graph) {
+            if (true) {
+                visit(v);
             }
-        }        
-        return deps;
-
+        }
     }
+    
+    /**
+     * 
+     * @param u
+     */
+    private void visit(ControlFlowNode u) {
+        
+        int links = 0;
+        
+        for (AdjacentEdge<ControlFlowNode, Primitive> e : graph.adjacent(u)) {
+            if (!(e.edgeInfo instanceof Primitive.NullStatement)) links++;
+            
+            ControlFlowNode v = e.target;
+            Dependencies vDepsIn = v.getDepends();
+            Dependencies depsOut;
+            
 
+            if (links > 1) {
+                depsOut = e.edgeInfo.
+                        calculateDependencies(v.getDepends());
+                depsOut = vDepsIn.merge(depsOut);
+                
+            } else {
+                depsOut = e.edgeInfo.
+                        calculateDependencies(u.getDepends());
+            }
+            
+            v.setDepends(depsOut);
+            
+            if (!depsOut.equals(vDepsIn)) {
+                visit(e.target);
+            }
+            
+        }
+    }
+  
     public String toString() {
         String result = "Entry = " + entry + " Exit = " + exit + "\n";
         // As the graph is connected we just print the edges
@@ -155,9 +174,9 @@ public class FlowGraph {
         buildPrimitive(exit_body, exit, new Primitive.NullStatement(null));
 
         // Add null exit_body --> enter_body edge
-        buildPrimitive(exit_body, enter_body, 
+        buildPrimitive(exit_body, enter_body,
                 new Primitive.NullStatement(null));
-
+        
         // Add edges for statements inside the repeat statement
         buildStatement(enter_body, exit_body, repeat.getStatement());
     }

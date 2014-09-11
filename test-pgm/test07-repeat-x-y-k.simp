@@ -1,0 +1,13 @@
+// repeat after first pass y depends on z
+// and after the second pass x does as well
+// { (a,[z]), (k,[z]), (x,[z]), (y,[z]), (z,[z]) }
+inputs z;
+{
+	y = 0;
+	repeat {
+	    a = k;
+	    k = x;
+		x = y;
+		y = z;
+	}
+}
