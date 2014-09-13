@@ -1,7 +1,6 @@
 package dependencies;
 
 //import java.io.PrintStream;
-import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.SortedMap;
@@ -46,7 +45,8 @@ public class Dependencies {
     /** Construct dependencies that are a copy of this */
     public Dependencies copy() {
         Dependencies newCopy = new Dependencies();
-        for (SortedMap.Entry<String, DependSet> entry : dependencies.entrySet()) {
+        for (SortedMap.Entry<String, DependSet> 
+                entry : dependencies.entrySet()) {
             newCopy.dependencies.put(entry.getKey(), entry.getValue().copy());
         }
         return newCopy;
@@ -55,7 +55,8 @@ public class Dependencies {
     public String toString() {
         String result = "{";
         String sep = " ";
-        for (SortedMap.Entry<String, DependSet> entry : dependencies.entrySet()) {
+        for (SortedMap.Entry<String, DependSet> 
+                entry : dependencies.entrySet()) {
             // Omit any empty dependencies when printing
             if (!entry.getValue().isEmpty()) {
                 result += sep + "(" + entry.getKey() + ","
