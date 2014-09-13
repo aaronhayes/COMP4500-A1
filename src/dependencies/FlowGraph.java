@@ -58,43 +58,51 @@ public class FlowGraph {
         return exit.getDepends();
     }
     
+    /**
+     * Perform a Depth First Search On the FlowGraph
+     */
     private void depthFirstSearch() {
         for (ControlFlowNode v : graph) {
-            if (true) {
-                visit(v);
-            }
+            visit(v);
         }
     }
     
     /**
-     * 
-     * @param u
+     * Visit a ControlFlowNode (vertex) for a DFS traversal
+     *  - treat vertex as unvisited if calculating dependencies of edge 
+     *      would change the dependencies of the node.
+     *      
+     * @param u 
+     *          ControlFlowNode vertex in graph 
      */
     private void visit(ControlFlowNode u) {
         
-        int links = 0;
+        int links = 0;  // Count the number of edges from each Vertex
         
         for (AdjacentEdge<ControlFlowNode, Primitive> e : graph.adjacent(u)) {
             if (!(e.edgeInfo instanceof Primitive.NullStatement)) links++;
             
-            ControlFlowNode v = e.target;
-            Dependencies vDepsIn = v.getDepends();
-            Dependencies depsOut;
+            ControlFlowNode v = e.target;           // Target Vertex
+            Dependencies depsIn = v.getDepends();   // Dependencies of Origin
+            Dependencies depsTarget;                // Dependencies of Target
             
 
             if (links > 1) {
-                depsOut = e.edgeInfo.
+                /* If more than 1 non Null statement extends from a Vertex
+                    dependencies at target dependencies need to be merged
+                        (support for select statements)                 */
+                depsTarget = e.edgeInfo.
                         calculateDependencies(v.getDepends());
-                depsOut = vDepsIn.merge(depsOut);
-                
+                depsTarget = depsIn.merge(depsTarget);
             } else {
-                depsOut = e.edgeInfo.
+                depsTarget = e.edgeInfo.
                         calculateDependencies(u.getDepends());
             }
             
-            v.setDepends(depsOut);
+            v.setDepends(depsTarget);           // Update Target Dependencies
             
-            if (!depsOut.equals(vDepsIn)) {
+            // Visit Target if dependencies differ
+            if (!depsTarget.equals(depsIn)) {
                 visit(e.target);
             }
             
@@ -127,25 +135,22 @@ public class FlowGraph {
     public void buildCompound(ControlFlowNode entry, ControlFlowNode exit,
             Compound compound) {
 
-        int count = 0;
-        int max = compound.getStatements().size();
-        ControlFlowNode last = entry;
-        ControlFlowNode next;
+        int count = 0;                  // Number of edges added to graph
+        int max = compound.getStatements().size();  // 
+        ControlFlowNode last = entry;   // Previous Vertex In ControlFlowGraph  
+        ControlFlowNode next;           // Next Vertex In ControlFlowGraph
 
-        for (Statement s : compound.getStatements()) {
+        for (Statement statement : compound.getStatements()) {
             count++;
-            if (count == 1 && max > 1) {
+            if (count < max && max > 1) {
+                // Create new Vertex for additional edges    
                 next = newVertex();
-                buildStatement(entry, next, s);
-                last = next;
-            } else if (count == 1 && max == 1) {
-                buildStatement(entry, exit, s);
-            } else if (count > 1 && count < max) {
-                next = newVertex();
-                buildStatement(last, next, s);
+                statement.buildGraph(last, next, this);
                 last = next;
             } else {
-                buildStatement(last, exit, s);
+                // Last statement in compound statement
+                // No need to create any additional vertices
+                statement.buildGraph(last, exit, this);
             }
         }
     }
@@ -157,28 +162,30 @@ public class FlowGraph {
      *            vertex already in graph
      * @param exit
      *            vertex already in graph
-     * @param compound
+     * @param repeat
      *            statement
      */
     public void buildRepeat(ControlFlowNode entry, ControlFlowNode exit,
             Repeat repeat) {
-        // Add null entry --> exit edge
-        buildPrimitive(entry, exit, new Primitive.NullStatement(null));
+        // Add NullStatement entry --> exit edge
+        buildPrimitive(entry, exit, new Primitive.NullStatement(repeat.pos));
 
-        // Add null entry --> enter_body edge
-        ControlFlowNode enter_body = newVertex();
-        buildPrimitive(entry, enter_body, new Primitive.NullStatement(null));
+        // Add NullStatement entry --> enter_body edge
+        ControlFlowNode enterBody = newVertex(); // entry vertex of repeat loop
+        buildPrimitive(entry, enterBody, 
+                new Primitive.NullStatement(repeat.pos));
         
-        // Add null exit_body --> exit edge
-        ControlFlowNode exit_body = newVertex();
-        buildPrimitive(exit_body, exit, new Primitive.NullStatement(null));
+        // Add NullStatement exit_body --> exit edge
+        ControlFlowNode exit_body = newVertex(); // exit vertex of repeat loop
+        buildPrimitive(exit_body, exit, 
+                new Primitive.NullStatement(repeat.pos));
 
-        // Add null exit_body --> enter_body edge
-        buildPrimitive(exit_body, enter_body,
-                new Primitive.NullStatement(null));
+        // Add NullStatement exit_body --> enter_body edge
+        buildPrimitive(exit_body, enterBody,
+                new Primitive.NullStatement(repeat.pos));
         
         // Add edges for statements inside the repeat statement
-        buildStatement(enter_body, exit_body, repeat.getStatement());
+        repeat.getStatement().buildGraph(enterBody, exit_body, this);
     }
 
     /**
@@ -188,36 +195,13 @@ public class FlowGraph {
      *            vertex already in graph
      * @param exit
      *            vertex already in graph
-     * @param compound
+     * @param select
      *            statement
      */
     public void buildSelect(ControlFlowNode entry, ControlFlowNode exit,
             Select select) {
-        for (Statement s : select.getStatements()) {
-            buildStatement(entry, exit, s);
-        }
-    }
-
-    /**
-     * Construct the control flow graph for any statement
-     * 
-     * @param entry
-     *            vertex already in graph
-     * @param exit
-     *            vertex already in graph
-     * @param s
-     *            the statement
-     */
-    private void buildStatement(ControlFlowNode entry, ControlFlowNode exit,
-            Statement s) {
-        if (s instanceof Primitive) {
-            buildPrimitive(entry, exit, (Primitive) s);
-        } else if (s instanceof Select) {
-            buildSelect(entry, exit, (Select) s);
-        } else if (s instanceof Repeat) {
-            buildRepeat(entry, exit, (Repeat) s);
-        } else if (s instanceof Compound) {
-            buildCompound(entry, exit, (Compound) s);
+        for (Statement statement : select.getStatements()) {
+            statement.buildGraph(entry, exit, this);
         }
     }
 }

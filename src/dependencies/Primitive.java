@@ -64,6 +64,10 @@ public abstract class Primitive extends Statement {
             this.expression = expression;
         }
 
+        /**
+         * Dependency calculation for assignment statement
+         * @param in dependencies
+         */
         @Override
         public Dependencies calculateDependencies(Dependencies in) {
             Dependencies out = in.copy();
